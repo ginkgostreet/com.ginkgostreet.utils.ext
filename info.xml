@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<extension key="com.ginkgostreet.utils.ext" type="module">
+  <file>ext</file>
+  <name>Utils - Extensions</name>
+  <description>Utilities to get around the peculiarities of CiviCRM Extensions and build them the way Ginkgo Street Likes to.</description>
+  <license>AGPL-3.0</license>
+  <maintainer>
+    <author>ginkgoMZD</author>
+    <email>mzd@ginkgostreet.com</email>
+  </maintainer>
+  <releaseDate>2014-07-01</releaseDate>
+  <version>1.0</version>
+  <develStage>alpha</develStage>
+  <compatibility>
+    <ver>4.4</ver>
+  </compatibility>
+  <comments>This is a new, undeveloped module</comments>
+  <civix>
+    <namespace>CRM/Utils/Ext</namespace>
+  </civix>
+</extension>
