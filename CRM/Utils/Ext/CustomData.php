@@ -88,5 +88,46 @@ class CRM_Utils_Ext_CustomData {
 
     return $result['values'][$result['id']]['value'];
   }
+  /**
+   * Add all fields in a Custom Group to a Profile.
+   * Field label and weight will be preserved.
+   * Does nothing if the CustomGroup contains no fields.
+   *
+   * @param int $uf_group_id the profile ID
+   * @param string $custom_group_name
+   *
+   * @return boolean false on failure to find fields to add.
+   * @throws CiviCRM_API3_Exception
+   */
+  public static function profileAddCustomGroupFields($uf_group_id, $custom_group_name) {
+
+    $custom_group_id = civicrm_api3('CustomGroup', 'getvalue',
+      array('name' => $custom_group_name, 'return' => 'id')
+    );
+
+    $apiResult = civicrm_api3('CustomField', 'get',
+      array( 'options' => array('limit' => 0), // no limit
+      'custom_group_id' => $custom_group_id,
+    ));
+
+    if ($apiResult['count'] == 0 ) {
+      return false;
+    }
+
+    $params = array();
+    foreach ($apiResult['values'] as $field_def) {
+      $params[] = array(
+        'uf_group_id' => $uf_group_id,
+        'field_name' => 'custom_'.$field_def['id'],
+        'label' => $field_def['label'],
+        'weight' => $field_def['weight'],
+      );
+    }
+
+    foreach ($params as $field) {
+      civicrm_api3('UFField', 'create', $field);
+    }
+    return TRUE;
+  }
 }
 
