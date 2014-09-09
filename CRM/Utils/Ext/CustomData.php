@@ -101,9 +101,12 @@ class CRM_Utils_Ext_CustomData {
    */
   public static function profileAddCustomGroupFields($uf_group_id, $custom_group_name) {
 
-    $custom_group_id = civicrm_api3('CustomGroup', 'getvalue',
-      array('name' => $custom_group_name, 'return' => 'id')
+    $api_custom_group = civicrm_api3('CustomGroup', 'getsingle',
+      array('name' => $custom_group_name, 'return' => array('id', 'extends'))
     );
+
+    $custom_group_id = $api_custom_group['id'];
+    $custom_group_type = $api_custom_group['extends'];
 
     $apiResult = civicrm_api3('CustomField', 'get',
       array( 'options' => array('limit' => 0), // no limit
@@ -111,7 +114,7 @@ class CRM_Utils_Ext_CustomData {
     ));
 
     if ($apiResult['count'] == 0 ) {
-      return false;
+      return FALSE;
     }
 
     $params = array();
@@ -119,6 +122,7 @@ class CRM_Utils_Ext_CustomData {
       $params[] = array(
         'uf_group_id' => $uf_group_id,
         'field_name' => 'custom_'.$field_def['id'],
+        'field_type' => $custom_group_type,
         'label' => $field_def['label'],
         'weight' => $field_def['weight'],
       );
