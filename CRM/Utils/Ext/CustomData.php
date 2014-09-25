@@ -36,6 +36,7 @@ class CRM_Utils_Ext_CustomData {
   }
   /**
    * Create new Option Value with a check based on name.
+   * If exists, only the label will be updated to preserve existing value.
    * Returns the activity type ID
    *
    * @param array/int $optionGroup result of api OptionGroup Get, OR int Group ID
@@ -55,27 +56,26 @@ class CRM_Utils_Ext_CustomData {
       $group_id = $optionGroup['id'];
     }
 
-    $optionValue = civicrm_api('OptionValue', 'GetValue', array(
-      'version' => 3,
-      'name' => $optionName,
-      'option_group_id' => $group_id,
-      'return' => 'value'
-    ));
-
-    if (is_string($optionValue)) { // already exists, do nothing.
-      return $optionValue;
-    }
-
     $params = array(
       'version' => 3,
       'name' => $optionName,
-      'label' => $optionLabel,
       'option_group_id' => $group_id,
     );
 
-    if(!is_null($newValue)) {
-      $params['value'] = $newValue;
+    $apiOptionValue = civicrm_api('OptionValue', 'getsingle', array_merge($params,
+      array('return' => array('value', 'id'))
+    ));
+
+    if (CRM_Utils_Array::value('is_error', $apiOptionValue)) {
+      // doesn't exist
+      if(!is_null($newValue)) {
+        $params['value'] = $newValue;
+      }
+    } else {
+      $params['id'] = $apiOptionValue['id'];
     }
+
+    $params['label'] = $optionLabel;
 
     try {
       $result = civicrm_api3('OptionValue', 'create', $params);
