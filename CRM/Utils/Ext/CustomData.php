@@ -88,6 +88,41 @@ class CRM_Utils_Ext_CustomData {
 
     return $result['values'][$result['id']]['value'];
   }
+
+  public static function safeCreateRelationshipType($params) {
+    $apiResult = civicrm_api('RelationshipType', 'getsingle', $params);
+
+    if (!CRM_Utils_Array::value('is_error', $apiResult)) {
+      // Process as update
+      // Disallow updating names and Contact Types
+      $protected = array('name_a_b', 'name_b_a', 'contact_type_a', 'contact_type_b');
+      foreach ($protected as $field) {
+        if (!self::compareArrayFields($field, $apiResult, $params)) {
+          throw new API_Exception(
+            'Exception in safeCreateRelationshipType. Trying to change a protected field.'
+          );
+        }
+      }
+
+      $params['id'] = $apiResult['id'];
+    }
+
+    //Proceed with Create
+    try {
+      return civicrm_api3('RelationshipType', 'create', $params);
+    } catch (CiviCRM_API3_Exception $x) {
+      throw new API_Exception(
+        'Exception in safeCreateRelationshipType. API3_Exception: '.$x->getMessage()
+        , $x->getErrorCode(), $x->getExtraParams(), $x
+        );
+    }
+  }
+  
+  private static function compareArrayFields($field, $arr1, $arr2) {
+    return (
+      $arr1[$field] == $arr2[$field]
+      );
+  }
   /**
    * Add all fields in a Custom Group to a Profile.
    * Field label and weight will be preserved.
