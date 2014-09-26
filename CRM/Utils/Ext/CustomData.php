@@ -117,7 +117,7 @@ class CRM_Utils_Ext_CustomData {
         );
     }
   }
-  
+
   private static function compareArrayFields($field, $arr1, $arr2) {
     return (
       $arr1[$field] == $arr2[$field]
@@ -154,12 +154,15 @@ class CRM_Utils_Ext_CustomData {
 
     $params = array();
     foreach ($apiResult['values'] as $field_def) {
+      // TODO: could do api.getfields for both of these and automate
       $params[] = array(
         'uf_group_id' => $uf_group_id,
         'field_name' => 'custom_'.$field_def['id'],
         'field_type' => $custom_group_type,
         'label' => $field_def['label'],
         'weight' => $field_def['weight'],
+        'help_pre' => $field_def['help_pre'],
+        'help_post' => $field_def['help_post'],
       );
     }
 
